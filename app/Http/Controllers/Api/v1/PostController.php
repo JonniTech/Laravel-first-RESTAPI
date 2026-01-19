@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -14,7 +15,9 @@ class PostController extends Controller
      */
     public function index()
     {
-        return Post::all();
+        /** @var User $user */
+        $user = auth('sanctum')->user();
+        return $user->posts()->get();
     }
 
     /**
@@ -23,7 +26,10 @@ class PostController extends Controller
     public function store(Request $request)
     {
         $this->validateRequest($request);
-        $post = Post::create($request->all());
+        /** @var User $user */
+        $user = auth('sanctum')->user();
+        $data = array_merge($request->all(), ['user_id' => $user->id]);
+        $post = Post::create($data);
         return response()->json($post, 201);
     }
 
@@ -32,7 +38,19 @@ class PostController extends Controller
      */
     public function show($id)
     {
-        return Post::findOrFail($id);
+        /** @var User $user */
+        $user = auth('sanctum')->user();
+        $post = Post::findOrFail($id);
+
+        if ($post->user_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to access this resource. You can only manage your own posts.',
+                'error' => 'Forbidden',
+            ], 403);
+        }
+
+        return response()->json($post, 200);
     }
 
     /**
@@ -41,7 +59,18 @@ class PostController extends Controller
     public function update(Request $request, $id)
     {
         $this->validateRequest($request);
+        /** @var User $user */
+        $user = auth('sanctum')->user();
         $post = Post::findOrFail($id);
+
+        if ($post->user_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to access this resource. You can only manage your own posts.',
+                'error' => 'Forbidden',
+            ], 403);
+        }
+
         $post->update($request->all());
         return response()->json($post, 200);
     }
@@ -51,7 +80,19 @@ class PostController extends Controller
      */
     public function destroy($id)
     {
-        Post::destroy($id);
+        /** @var User $user */
+        $user = auth('sanctum')->user();
+        $post = Post::findOrFail($id);
+
+        if ($post->user_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to access this resource. You can only manage your own posts.',
+                'error' => 'Forbidden',
+            ], 403);
+        }
+
+        $post->delete();
         return response()->json(null, 204);
     }
 
