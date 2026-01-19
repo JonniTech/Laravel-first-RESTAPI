@@ -1,59 +1,191 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Laravel Post CRUD API with Authentication
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## API Endpoints
 
-## About Laravel
+### Authentication Endpoints (Public)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+#### Register
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **URL:** `POST /api/v1/auth/register`
+- **Headers:** `Content-Type: application/json`
+- **Body:**
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+```json
+{
+    "name": "John Doe",
+    "email": "john@example.com",
+    "password": "password123",
+    "password_confirmation": "password123"
+}
+```
 
-## Learning Laravel
+- **Response:** 201 Created
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+```json
+{
+    "message": "User registered successfully",
+    "user": {
+        "id": 1,
+        "name": "John Doe",
+        "email": "john@example.com",
+        "created_at": "2026-01-19T10:00:00.000000Z",
+        "updated_at": "2026-01-19T10:00:00.000000Z"
+    },
+    "token": "auth_token_here"
+}
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+#### Login
 
-## Laravel Sponsors
+- **URL:** `POST /api/v1/auth/login`
+- **Headers:** `Content-Type: application/json`
+- **Body:**
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```json
+{
+    "email": "john@example.com",
+    "password": "password123"
+}
+```
 
-### Premium Partners
+- **Response:** 200 OK
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```json
+{
+    "message": "User logged in successfully",
+    "user": {
+        "id": 1,
+        "name": "John Doe",
+        "email": "john@example.com",
+        "created_at": "2026-01-19T10:00:00.000000Z",
+        "updated_at": "2026-01-19T10:00:00.000000Z"
+    },
+    "token": "auth_token_here"
+}
+```
 
-## Contributing
+### Protected Endpoints (Require Authentication)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+#### Get Current User
 
-## Code of Conduct
+- **URL:** `GET /api/v1/user`
+- **Headers:** `Authorization: Bearer {token}`
+- **Response:** 200 OK (User object)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+#### Logout
 
-## Security Vulnerabilities
+- **URL:** `POST /api/v1/auth/logout`
+- **Headers:** `Authorization: Bearer {token}`
+- **Response:** 200 OK
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```json
+{
+    "message": "User logged out successfully"
+}
+```
 
-## License
+### Post CRUD Endpoints (Require Authentication)
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+#### Get All User Posts
+
+- **URL:** `GET /api/v1/posts`
+- **Headers:** `Authorization: Bearer {token}`
+- **Response:** 200 OK (Array of posts)
+
+#### Create Post
+
+- **URL:** `POST /api/v1/posts`
+- **Headers:**
+    - `Authorization: Bearer {token}`
+    - `Content-Type: application/json`
+- **Body:**
+
+```json
+{
+    "title": "Post Title",
+    "content": "Post content here..."
+}
+```
+
+- **Response:** 201 Created
+
+```json
+{
+    "id": 1,
+    "user_id": 1,
+    "title": "Post Title",
+    "content": "Post content here...",
+    "created_at": "2026-01-19T10:00:00.000000Z",
+    "updated_at": "2026-01-19T10:00:00.000000Z"
+}
+```
+
+#### Get Single Post
+
+- **URL:** `GET /api/v1/posts/{id}`
+- **Headers:** `Authorization: Bearer {token}`
+- **Response:** 200 OK (Post object)
+- **Note:** User can only view their own posts (authorization policy enforced)
+
+#### Update Post
+
+- **URL:** `PUT|PATCH /api/v1/posts/{id}`
+- **Headers:**
+    - `Authorization: Bearer {token}`
+    - `Content-Type: application/json`
+- **Body:**
+
+```json
+{
+    "title": "Updated Title",
+    "content": "Updated content..."
+}
+```
+
+- **Response:** 200 OK (Updated post object)
+- **Note:** User can only update their own posts (authorization policy enforced)
+
+#### Delete Post
+
+- **URL:** `DELETE /api/v1/posts/{id}`
+- **Headers:** `Authorization: Bearer {token}`
+- **Response:** 204 No Content
+- **Note:** User can only delete their own posts (authorization policy enforced)
+
+## Validation Rules
+
+### Register
+
+- `name`: Required, string, max 255 characters
+- `email`: Required, email format, must be unique
+- `password`: Required, string, minimum 8 characters, must be confirmed
+
+### Login
+
+- `email`: Required, email format
+- `password`: Required, string
+
+### Create/Update Post
+
+- `title`: Required, string, max 255 characters
+- `content`: Required, string
+
+## Authentication
+
+All protected endpoints require an `Authorization` header with a Bearer token:
+
+```
+Authorization: Bearer {token}
+```
+
+The token is obtained from the `/api/v1/auth/register` or `/api/v1/auth/login` endpoints.
+
+## Features
+
+-  User authentication using Laravel Sanctum
+-  Post CRUD operations
+-  Request validation on all endpoints
+-  Authorization policies (users can only manage their own posts)
+-  API versioning (v1)
+-  Proper HTTP response codes and JSON responses
+-  MySQL database integration
